@@ -7,7 +7,6 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Response;
 
 class GenusController extends Controller
 {
@@ -16,8 +15,22 @@ class GenusController extends Controller
      */
     public function showAction($genusName)
     {
+
+        $funFact = 'Octopuses can change the color of their body in just *three-tenths* of a second!';
+
+        $cache = $this->get('doctrine_cache.providers.my_markdown_cache');
+        $key = md5($funFact);
+        if ($cache->contains($key)) {
+            $funFact = $cache->fetch($key);
+        } else {
+            $funFact = $this->get('markdown.parser')
+                ->transform($funFact);
+            $cache->save($key, $funFact);
+        }
+
         return $this->render('genus/show.html.twig',[
-            'name' => $genusName
+            'name' => $genusName,
+            'funFact' => $funFact,
         ]);
 
     }
